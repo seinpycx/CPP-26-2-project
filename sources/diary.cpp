@@ -1,13 +1,16 @@
 #include <iostream>
+#include <fstream> // 비밀번호 설정을 파일에 저장하고 다음 실행 시 불러오기 위해 사용
 #include <string>
 
 using namespace std;
+
+const string SETTINGS_FILE = "diary_settings.txt";
 
 class LoginManager {
 private:
     string loginPassword;
 
-    // 영문 대소문자, 숫자, 기호만 포함되어 있는지 확인한다.
+    // 영문 대소문자, 숫자, 기호만 포함되어 있는지 확인
     bool containsOnlyAllowedCharacters(const string& text) const {
         for (string::size_type i = 0; i < text.length(); i++) {
             unsigned char ch = static_cast<unsigned char>(text[i]);
@@ -28,8 +31,39 @@ private:
     }
 
 public:
+    // 저장된 로그인 비밀번호를 설정 파일에서 불러옴
+    bool loadLoginPassword() {
+        ifstream inputFile(SETTINGS_FILE);
+
+        if (!inputFile.is_open()) {
+            return false;
+        }
+
+        getline(inputFile, loginPassword);
+        return loginPassword != "";
+    }
+
+    // 로그인 비밀번호를 설정 파일에 저장
+    bool saveLoginPassword() const {
+        ofstream outputFile(SETTINGS_FILE);
+
+        if (!outputFile.is_open()) {
+            cout << "설정 파일을 열 수 없습니다.\n";
+            return false;
+        }
+
+        outputFile << loginPassword << '\n';
+
+        if (!outputFile) {
+            cout << "비밀번호를 파일에 저장하지 못했습니다.\n";
+            return false;
+        }
+
+        return true;
+    }
+
     // 처음 사용할 로그인 비밀번호를 설정한다.
-    void setLoginPassword() {
+    bool setLoginPassword() {
         string password;
         string confirmPassword;
 
@@ -62,8 +96,13 @@ public:
 
             if (password == confirmPassword) {
                 loginPassword = password;
+
+                if (!saveLoginPassword()) {
+                    return false;
+                }
+
                 cout << "로그인 비밀번호 설정이 완료되었습니다.\n";
-                return;
+                return true;
             }
 
             cout << "두 비밀번호가 일치하지 않습니다. 처음부터 다시 설정하세요.\n\n";
@@ -79,9 +118,17 @@ public:
 int main() {
     LoginManager loginManager;
 
-    cout << "=== 보안 다이어리 초기 설정 ===\n";
-    loginManager.setLoginPassword();
+    if (loginManager.loadLoginPassword()) {
+        cout << "저장된 로그인 비밀번호 설정을 불러왔습니다.\n";
+        cout << "이후 단계에서 이 값으로 로그인 기능을 연결하면 됩니다.\n";
+        return 0;
+    }
 
-    cout << "\n현재 실행 중인 프로그램에 비밀번호가 설정되었습니다.\n";
+    cout << "=== 보안 다이어리 초기 설정 ===\n";
+    if (!loginManager.setLoginPassword()) {
+        return 1;
+    }
+
+    cout << "\n설정이 완료되었습니다. 설정 파일: " << SETTINGS_FILE << '\n';
     return 0;
 }

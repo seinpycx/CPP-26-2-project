@@ -57,6 +57,7 @@ private:
         return "";
     }
 
+    // 로그인 비밀번호를 최대 5회 입력받아 확인함
     bool enterPassword(const string& prompt) const {
         string inputPassword;
 
@@ -76,6 +77,7 @@ private:
         return false;
     }
 
+    // 본인 확인 답변을 최대 5회 입력받아 확인함
     bool verifySecurityAnswer() const {
         string inputAnswer;
 
@@ -274,6 +276,7 @@ public:
         return input == loginPassword;
     }
 
+    // 비밀번호 5회 실패 시 본인 확인 후 비밀번호 재입력을 진행함
     bool login() const {
         cout << "\n=== 로그인 ===\n";
 
@@ -297,6 +300,49 @@ public:
     }
 };
 
+// 다이어리 항목 하나의 번호, 제목, 본문, 잠금 상태를 관리함
+class DiaryEntry {
+// private 영역은 클래스 외부에서 멤버 변수에 직접 접근하지 못하게 함
+private:
+    // 다이어리 항목을 구분하는 번호를 저장함
+    int entryNumber;
+
+    // 다이어리 제목을 저장함
+    string title;
+
+    // 다이어리 본문을 저장함
+    string content;
+
+    // 항목이 잠겨 있는지 저장하며 false는 일반 상태를 의미함
+    bool locked;
+
+// public 영역은 클래스 외부에서 사용할 수 있는 생성자와 멤버 함수를 제공함
+public:
+    // 항목 정보를 전달받아 멤버 변수를 초기화하고 처음 상태를 일반으로 설정함
+    DiaryEntry(int number, const string& entryTitle, const string& entryContent)
+        : entryNumber(number), title(entryTitle), content(entryContent), locked(false) {}
+
+    // 다이어리 항목 번호를 외부에 반환함
+    int getEntryNumber() const {
+        return entryNumber;
+    }
+
+    // 다이어리 제목을 외부에 반환함
+    string getTitle() const {
+        return title;
+    }
+
+    // 다이어리 본문을 외부에 반환함
+    string getContent() const {
+        return content;
+    }
+
+    // 잠금 상태를 외부에 반환하며 true면 잠김, false면 일반 상태임
+    bool isLocked() const {
+        return locked;
+    }
+};
+
 int main() {
     LoginManager loginManager;
 
@@ -313,8 +359,7 @@ int main() {
     cout << "설정 파일에 저장했습니다: " << SETTINGS_FILE << "\n";
 
     if (loginManager.login()) {
-        cout << "로그인에 성공했습니다. 다이어리 목록으로 이동합니다.\n";
-        // 다음 작업에서 이 지점에 다이어리 목록 기능을 연결할 예정
+        cout << "로그인에 성공했습니다.\n";
     } else {
         cout << "로그인할 수 없습니다. 프로그램을 종료합니다.\n";
     }
